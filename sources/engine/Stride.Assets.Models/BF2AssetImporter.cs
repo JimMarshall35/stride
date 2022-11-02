@@ -7,6 +7,8 @@ using Stride.Core.Assets;
 using Stride.Core.Diagnostics;
 using Stride.Core.IO;
 using Stride.Importer.Common;
+using Stride.Assets.Models.bf2Importer;
+using Stride.Assets.Textures;
 
 namespace Stride.Assets.Models
 {
@@ -26,8 +28,6 @@ namespace Stride.Assets.Models
         }
 
         public override EntityInfo GetEntityInfo(UFile localPath, Logger logger, AssetImporterParameters importParameters)
-        {
-            throw new NotImplementedException();
-        }
+            => BF2Importer.ExtractEntityInfo(localPath.FullPath, importParameters.IsTypeSelectedForOutput(typeof(TextureAsset)));
     }
 }
