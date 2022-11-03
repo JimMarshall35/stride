@@ -25,12 +25,14 @@ namespace Stride.Assets.Models
 
         protected override Model LoadModel(ICommandContext commandContext, ContentManager contentManager)
         {
-            throw new NotImplementedException();
+            return bf2Importer.BF2Importer.Convert(SourcePath, Location);
         }
 
         protected override Skeleton LoadSkeleton(ICommandContext commandContext, ContentManager contentManager)
         {
-            throw new NotImplementedException();
+            var s = new Skeleton();
+            s.Nodes = new ModelNodeDefinition[0];
+            return s;
         }
 
         public static bool IsSupportingExtensions(string ext)
