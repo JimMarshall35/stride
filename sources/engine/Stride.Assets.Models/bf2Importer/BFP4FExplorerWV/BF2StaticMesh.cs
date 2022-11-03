@@ -45,6 +45,7 @@ namespace Stride.Assets.Models.bf2Importer.BFP4FExplorerWV
             const int UV_Y_VERTEX_OFFSET = 8;
             // (number of raw floats / number of complete vertices) gives number of floats per vertex in loaded file
             int fileVertexSize = geometry.vertices.Count / (int)geometry.numVertices;
+
             _compactedVertices = new float[geometry.numVertices * COMPACTED_VERT_SIZE_IN_FLOATS];
 
             int writePtr = 0;

@@ -181,17 +181,17 @@ namespace Stride.Assets.Models.bf2Importer
             var strideBf2Meshes = new List<StrideBf2MeshInfo>();
 
             // Build the vertices data buffer 
-            var sourceVertsArray = parsedMesh.geometry.vertices.ToArray();
+            var sourceVertsArray = parsedMesh.CompactVertices;
 
-            var vertexBuffer = new byte[parsedMesh.geometry.vertices.Count * sizeof(float)];
+            var vertexBuffer = new byte[sourceVertsArray.Length * sizeof(float)];
 
             for (var i=0; i < parsedMesh.geomat.Count; i++)
             {
                 // Build the vertex declaration
                 var vertexElements = new List<VertexElement>();
                 int stride = 0;
-                vertexElements.Add(VertexElement.Position<Vector4>(0, stride));
-                stride += 7*sizeof(float); // see GetVertex
+                vertexElements.Add(VertexElement.Position<Vector3>(0, stride));
+                stride += Vector3.SizeInBytes; // see GetVertex
                 // I don't think it likes the fact I'm specifying vertices that aren't packed together.
                 // TODO: try either:
                 //      1.) add another vertex element in the middle here
@@ -213,11 +213,10 @@ namespace Stride.Assets.Models.bf2Importer
                     numIndices += mat.numIndicies;
                 }
                 var indicesBuffer = new ushort[numIndices];
-                int m = parsedMesh.geometry.vertices.Count / (int)parsedMesh.geometry.numVertices;
                 foreach (var mat in thisMesh.materials)
                     for (int j = 0; j < numIndices; j++)
                     {
-                        int pos = (parsedMesh.geometry.indices[(int)mat.indiciesStartIndex + j] + (int)mat.vertexStartIndex) * m;
+                        int pos = parsedMesh.geometry.indices[(int)mat.indiciesStartIndex + j] + (int)mat.vertexStartIndex;
 
                         indicesBuffer[j] = (ushort)pos;
                     }
