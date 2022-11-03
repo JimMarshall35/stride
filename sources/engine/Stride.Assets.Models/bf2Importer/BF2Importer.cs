@@ -204,7 +204,7 @@ namespace Stride.Assets.Models.bf2Importer
 
                 System.Buffer.BlockCopy(sourceVertsArray, 0, vertexBuffer, 0, vertexBuffer.Length);
 
-                // Build the indices data buffer - I'd rather not, for now
+                // Build the indices data buffer
                 var thisMesh = parsedMesh.geomat[i];
                 
                 uint numIndices = 0;
