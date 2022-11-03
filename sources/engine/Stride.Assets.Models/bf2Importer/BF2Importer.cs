@@ -191,11 +191,6 @@ namespace Stride.Assets.Models.bf2Importer
                 var vertexElements = new List<VertexElement>();
                 int stride = 0;
                 vertexElements.Add(VertexElement.Position<Vector3>(0, stride));
-                stride += Vector3.SizeInBytes; // see GetVertex
-                // I don't think it likes the fact I'm specifying vertices that aren't packed together.
-                // TODO: try either:
-                //      1.) add another vertex element in the middle here
-                //      2.) process the parsedMesh.geometry.vertices to create a packed buffer ignoring whatever is in the middle
                 vertexElements.Add(VertexElement.TextureCoordinate<Vector2>(0, stride));
                 stride += Vector2.SizeInBytes;
 
