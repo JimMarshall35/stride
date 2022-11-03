@@ -24,6 +24,7 @@ namespace Stride.Assets.Models.bf2Importer.BFP4FExplorerWV
 
         public float[] CompactVertices => _compactedVertices;
 
+
         /// <summary>
         /// Extracts from geometry.vertices
         /// those vertex attributes that are understood and forms
@@ -37,6 +38,11 @@ namespace Stride.Assets.Models.bf2Importer.BFP4FExplorerWV
         /// </summary>
         private void SetCompactedVertices()
         {
+            const int POS_X_VERTEX_OFFSET = 0;
+            const int POS_Y_VERTEX_OFFSET = 1;
+            const int POS_Z_VERTEX_OFFSET = 2;
+            const int UV_X_VERTEX_OFFSET = 7;
+            const int UV_Y_VERTEX_OFFSET = 8;
             // (number of raw floats / number of complete vertices) gives number of floats per vertex in loaded file
             int fileVertexSize = geometry.vertices.Count / (int)geometry.numVertices;
             _compactedVertices = new float[geometry.numVertices * COMPACTED_VERT_SIZE_IN_FLOATS];
@@ -46,13 +52,13 @@ namespace Stride.Assets.Models.bf2Importer.BFP4FExplorerWV
             {
                 int pos = i * fileVertexSize;
                 // position
-                _compactedVertices[writePtr++] = geometry.vertices[pos];
-                _compactedVertices[writePtr++] = geometry.vertices[pos + 1];
-                _compactedVertices[writePtr++] = geometry.vertices[pos + 2];
+                _compactedVertices[writePtr++] = geometry.vertices[pos + POS_X_VERTEX_OFFSET];
+                _compactedVertices[writePtr++] = geometry.vertices[pos + POS_Y_VERTEX_OFFSET];
+                _compactedVertices[writePtr++] = geometry.vertices[pos + POS_Z_VERTEX_OFFSET];
 
                 // uv
-                _compactedVertices[writePtr++] = geometry.vertices[pos + 7];
-                _compactedVertices[writePtr++] = geometry.vertices[pos + 8];
+                _compactedVertices[writePtr++] = geometry.vertices[pos + UV_X_VERTEX_OFFSET];
+                _compactedVertices[writePtr++] = geometry.vertices[pos + UV_Y_VERTEX_OFFSET];
 
             }
         }
