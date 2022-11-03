@@ -13,11 +13,49 @@ namespace Stride.Assets.Models.bf2Importer.BFP4FExplorerWV
 {
     public class BF2StaticMesh
     {
+        public const int COMPACTED_VERT_SIZE_IN_FLOATS = 6;
         public Helper.BF2MeshHeader header;
         public Helper.BF2MeshGeometry geometry;
         public uint u1;
         public List<Helper.BF2MeshSTMLod> lods;
         public List<Helper.BF2MeshSTMGeometryMaterial> geomat;
+
+        private float[] _compactedVertices;
+
+        public float[] CompactVertices => _compactedVertices;
+
+        /// <summary>
+        /// Extracts from geometry.vertices
+        /// those vertex attributes that are understood and forms
+        /// them into a compact array of floats to pass to stride.
+        /// 
+        /// This is an array that contains vertices for several different 
+        /// meshes, as many meshes as the size of geomat. Each object in geomat describes
+        /// a chunk of the geometry.indices buffer and those indices all index into a common buffer of floats
+        /// in this case it will be _compactVertices - this modification has been seen to work in the bf2 tools repo.
+        /// 
+        /// </summary>
+        private void SetCompactedVertices()
+        {
+            // (number of raw floats / number of complete vertices) gives number of floats per vertex in loaded file
+            int fileVertexSize = geometry.vertices.Count / (int)geometry.numVertices;
+            _compactedVertices = new float[geometry.numVertices * COMPACTED_VERT_SIZE_IN_FLOATS];
+
+            int writePtr = 0;
+            for (int i = 0; i < geometry.numVertices; i++)
+            {
+                int pos = i * fileVertexSize;
+                // position
+                _compactedVertices[writePtr++] = geometry.vertices[pos];
+                _compactedVertices[writePtr++] = geometry.vertices[pos + 1];
+                _compactedVertices[writePtr++] = geometry.vertices[pos + 2];
+
+                // uv
+                _compactedVertices[writePtr++] = geometry.vertices[pos + 7];
+                _compactedVertices[writePtr++] = geometry.vertices[pos + 8];
+
+            }
+        }
 
         public BF2StaticMesh(byte[] data)
         {
@@ -32,6 +70,7 @@ namespace Stride.Assets.Models.bf2Importer.BFP4FExplorerWV
                 lods.Add(new Helper.BF2MeshSTMLod(m, header));
             for (int i = 0; i < count; i++)
                 geomat.Add(new Helper.BF2MeshSTMGeometryMaterial(m, header));
+            SetCompactedVertices();
         }
 
         //public List<RenderObject> ConvertForEngine(Engine3D engine, bool loadTextures, int geoMatIdx)
