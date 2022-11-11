@@ -24,10 +24,11 @@ namespace Stride.Assets.Models
 
         public override void GetAnimationDuration(UFile localPath, Logger logger, AssetImporterParameters importParameters, out TimeSpan startTime, out TimeSpan endTime)
         {
-            throw new NotImplementedException();
+            startTime = TimeSpan.Zero;
+            endTime = TimeSpan.Zero;
         }
 
         public override EntityInfo GetEntityInfo(UFile localPath, Logger logger, AssetImporterParameters importParameters)
-            => BF2Importer.ExtractEntityInfo(localPath.FullPath, importParameters.IsTypeSelectedForOutput(typeof(TextureAsset)));
+            => NewBf2Importer.ExtractEntityInfo(localPath.FullPath);
     }
 }

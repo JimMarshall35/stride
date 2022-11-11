@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Stride.Animations;
+using Stride.Assets.Models.bf2Importer;
 using Stride.Core.BuildEngine;
 using Stride.Core.Serialization.Contents;
 using Stride.Rendering;
@@ -20,18 +21,20 @@ namespace Stride.Assets.Models
 
         protected override Dictionary<string, AnimationClip> LoadAnimation(ICommandContext commandContext, ContentManager contentManager, out TimeSpan duration)
         {
-            throw new NotImplementedException();
+            duration = TimeSpan.FromSeconds(0);
+            return new Dictionary<string, AnimationClip>();
         }
 
         protected override Model LoadModel(ICommandContext commandContext, ContentManager contentManager)
         {
-            return bf2Importer.BF2Importer.Convert(SourcePath, Location);
+            return NewBf2Importer.Convert(SourcePath);
         }
 
         protected override Skeleton LoadSkeleton(ICommandContext commandContext, ContentManager contentManager)
         {
             var s = new Skeleton();
-            s.Nodes = new ModelNodeDefinition[0];
+            s.Nodes = new ModelNodeDefinition[1];
+            s.Nodes[0] = new ModelNodeDefinition();
             return s;
         }
 

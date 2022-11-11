@@ -191,6 +191,7 @@ namespace Stride.Assets.Models.bf2Importer
                 var vertexElements = new List<VertexElement>();
                 int stride = 0;
                 vertexElements.Add(VertexElement.Position<Vector3>(0, stride));
+                stride += Vector3.SizeInBytes;
                 vertexElements.Add(VertexElement.TextureCoordinate<Vector2>(0, stride));
                 stride += Vector2.SizeInBytes;
 
