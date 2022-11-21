@@ -20,6 +20,40 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
     /// </summary>
     public class bf2mat
     {
+        private bool IsBumpMap(string path) =>
+                   (path.Contains("_b.")
+                   || path.Contains("_n.")
+                   || path.Contains("_b_")
+                   || path.Contains("_n_")
+                   || path.Contains("_deb.")
+                   || path.Contains("_crb.")
+                   || path.Contains("deb_")
+                   || path.Contains("_crb_"));
+        public void PopulateShaderInfo()
+        {
+            facenum = inum / 3;
+            if (mapnum > 0)
+            {
+                texmapid = new uint[mapnum];
+                mapuvid = new uint[mapnum];
+                isBumpMap = new bool[mapnum];
+            }
+            for (int i = 0; i < mapnum; i++)
+            {
+                isBumpMap[i] = IsBumpMap(map[i]);
+            }
+            switch (fxfile.ToLower())
+            {
+                case "skinnedmesh.fx":
+                    // TODO: fill these out accordin to vb code in modVisMeshShader.bas - this lays out in detail how the material system works
+                    break;
+                case "bundledmesh.fx":
+                    break;
+                case "staticmesh.fx":
+                    break;
+                
+            }
+        }
         /// <summary>
         /// 0=opaque, 1=blend, 2=alphatest
         /// </summary>

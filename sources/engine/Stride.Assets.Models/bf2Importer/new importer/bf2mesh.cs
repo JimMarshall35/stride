@@ -365,6 +365,8 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
             }
         }
 
+        
+
         private void ReadLodMat(Stream stream, bf2mat mat)
         {
             if (!isSkinnedMesh)
@@ -400,14 +402,8 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
             }
 
             //--- internal --------------------------------------
-            mat.facenum = mat.inum / 3;
-            if(mat.mapnum > 0)
-            {
-                mat.texmapid = new uint[mat.mapnum];
-                mat.mapuvid = new uint[mat.mapnum];
-                mat.isBumpMap = new bool[mat.mapnum];
-            }
-
+            
+            mat.PopulateShaderInfo();
             //'quick hack: needed for proper tangent computation
             //If vmesh.isBundledMesh Then .hasAnimatedUV = InString(.technique, "AnimatedUV")
         }

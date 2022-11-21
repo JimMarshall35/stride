@@ -1,14 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Stride.Assets.Materials;
 using Stride.Assets.Models.bf2Importer.new_importer;
 using Stride.Core.Mathematics;
 using Stride.Graphics;
 using Stride.Graphics.Data;
 using Stride.Importer.Common;
 using Stride.Rendering;
+using Stride.Rendering.Materials.ComputeColors;
 using static Stride.Engine.ModelComponent;
 
 namespace Stride.Assets.Models.bf2Importer
@@ -168,11 +171,71 @@ namespace Stride.Assets.Models.bf2Importer
             var draw = bfmesh.BuildStrideMeshDraw(0, 0);//hard code for now
             var mesh = new Mesh();
             mesh.Draw = draw;
-            mesh.Name = "Mesh1";
+            mesh.Name = "mesh";
             mesh.MaterialIndex = 0;
             mesh.NodeIndex = 0;
-            model.Add(mesh);
+            model.Meshes.Add(mesh);
             return model;
+        }
+
+        private static string GetMeshName(string path, int index) => $"{Path.GetFileName(path)}{index}_Mesh";
+        private static string GetNodeName(string path, int index) => $"{Path.GetFileName(path)}{index}_Node";
+        private static string GetMaterialName(string path, int index) => $"{Path.GetFileName(path)}{index}_Material";
+
+        private static bool ConsideredEqual(bf2mat mat1, bf2mat mat2)
+        {
+            if(mat1.alphamode != mat2.alphamode)
+            {
+                return false;
+            }
+            if (mat1.fxfile != mat2.fxfile)
+            {
+                return false;
+            }
+            if(mat1.technique != mat2.technique)
+            {
+                return false;
+            }
+            if (mat1.mapnum != mat2.mapnum)
+            {
+                return false;
+            }
+            if (mat1.map.Length != mat2.map.Length)
+            {
+                return false;
+            }
+            for(int i=0; i<mat1.map.Length; i++)
+            {
+                if(mat1.map[i] != mat2.map[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private static void AddMaterialIfNotPresent(List<bf2mat> materials, bf2mat newCandidateMaterial)
+        {
+            foreach(bf2mat mat in materials)
+            {
+                if(ConsideredEqual(mat, newCandidateMaterial))
+                {
+                    return;
+                }
+            }
+            materials.Add(newCandidateMaterial);
+        }
+
+        private static void AddToTextureDependenciesIfNotPresent(List<string> deps, string newCandidate)
+        {
+            foreach(string dep in deps)
+            {
+                if(newCandidate == dep)
+                {
+                    return;
+                }
+            }
+            deps.Add(newCandidate);
         }
 
         internal static EntityInfo ExtractEntityInfo(string path)
@@ -180,9 +243,56 @@ namespace Stride.Assets.Models.bf2Importer
             var bfmesh = Bf2Loader.LoadBf2File(path, LogErrorMessage);
             EntityInfo entityInfo = new EntityInfo();
             var meshParams = new List<MeshParameters>();
-            var mp = new MeshParameters();
-            mp.NodeName = "mesh";
-            mp.MeshName = path;
+            var nodeInfos = new List<NodeInfo>();
+            var uniqueMaterials = new List<bf2mat>();
+            var textureDependencies = new List<string>();
+            var materialsDict = new Dictionary<string, MaterialAsset>();
+
+            for (int i = 0; i < bfmesh.geom.Length; i++)
+            {
+                var geom = bfmesh.geom[i];
+                for(int j=0; j<bfmesh.geom[i].lodnum; j++)
+                {
+                    bf2lod lod = bfmesh.geom[i].lod[j];
+
+                    var nodeNum = lod.nodenum;
+                    for(int k=0; k<nodeNum; k++)
+                    {
+                        bf2Mat4x4 node = lod.node[k];
+                        var nodeInfo = new NodeInfo();
+                        nodeInfo.Depth = k;
+                        nodeInfo.Name = GetNodeName(path, k);
+                        nodeInfos.Add(nodeInfo);
+                    }
+                    for (int k=0; k<bfmesh.geom[j].lod[j].matnum; k++)
+                    {
+                        var mp = new MeshParameters();
+                        mp.MeshName = GetMeshName(path, k);
+                        mp.MaterialName = GetMaterialName(path, k);
+                        mp.NodeName = GetNodeName(path, k);
+
+                        meshParams.Add(mp);
+                        bf2mat mat = bfmesh.geom[j].lod[j].mat[k];
+                        AddMaterialIfNotPresent(uniqueMaterials, mat);
+                    }
+                }
+                //var mp = new MeshParameters();
+                //bfmesh.
+            }
+            foreach(var mat in uniqueMaterials)
+            {
+                foreach(var mapName in mat.map)
+                {
+                    AddToTextureDependenciesIfNotPresent(textureDependencies, mapName);
+                }
+                // TODO: add materials to entityinfo
+            }
+            
+            entityInfo.TextureDependencies = textureDependencies;
+            entityInfo.Nodes = nodeInfos;
+            entityInfo.Materials = materialsDict;
+            entityInfo.Models = meshParams;
+
             return entityInfo;
         }
 

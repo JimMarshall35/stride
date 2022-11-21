@@ -9,6 +9,8 @@ using Stride.Assets.Models.bf2Importer;
 using Stride.Core.BuildEngine;
 using Stride.Core.Serialization.Contents;
 using Stride.Rendering;
+using Stride.Core.Mathematics;
+
 
 namespace Stride.Assets.Models
 {
@@ -34,7 +36,12 @@ namespace Stride.Assets.Models
         {
             var s = new Skeleton();
             s.Nodes = new ModelNodeDefinition[1];
-            s.Nodes[0] = new ModelNodeDefinition();
+            var d = new ModelNodeDefinition();
+            d.ParentIndex = -1;
+            d.Transform.Rotation = Quaternion.Identity;
+            d.Transform.Scale = Vector3.One;
+            d.Flags = ModelNodeFlags.Default;
+            s.Nodes[0] = d;
             return s;
         }
 
