@@ -249,7 +249,7 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
             {
                 for(int j = 0; j < geom[i].lodnum; j++)
                 {
-                    ReadGeomLod(stream, geom[i].lod[j]);
+                    ReadGeomLod(stream, geom[i].lod[j], filePath);
                 }
             }
 
@@ -349,7 +349,7 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
             }
         }
 
-        private void ReadGeomLod(Stream stream, bf2lod lod)
+        private void ReadGeomLod(Stream stream, bf2lod lod, string filepath)
         {
             //internal: reset polycount
             lod.polycount = 0;
@@ -359,7 +359,7 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
             lod.mat = new bf2mat[lod.matnum];
             for(int i=0; i < lod.matnum; i++)
             {
-                lod.mat[i] = new bf2mat();
+                lod.mat[i] = new bf2mat(filepath);
                 ReadLodMat(stream, lod.mat[i]);
                 lod.polycount += lod.mat[i].inum / 3;
             }
