@@ -14,7 +14,7 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
         /// <summary>
         /// index of texmap
         /// </summary>
-        public int texmapid;
+        public string texmapFilename;
 
         /// <summary>
         /// ...

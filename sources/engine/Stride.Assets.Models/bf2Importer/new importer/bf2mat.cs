@@ -40,12 +40,16 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
         public bf2mat(string assetFileName)
         {
             _assetFileName = assetFileName;
+            for(int i=0; i<layer.Length; i++)
+            {
+                layer[i] = new mat_layer();
+            }
         }
 
         private void SetBase(int i)
         {
             layer[i].texcoff = 0;
-            layer[i].texmapid = (int)texmapid[0]; //where set?
+            layer[i].texmapFilename = map[0];
             layer[i].depthfunc = DepthFunc.GL_LESS;
             layer[i].depthWrite = true;
             layer[i].lighting = false;
@@ -69,7 +73,7 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
         private void SetAlphaTest(int i)
         {
             layer[i].texcoff = 0;
-            layer[i].texmapid = (int)texmapid[0];
+            layer[i].texmapFilename = map[0];
             layer[i].depthfunc = DepthFunc.GL_LESS;
             layer[i].depthWrite = true;
             layer[i].alphaTest = true;
@@ -80,7 +84,7 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
         private void SetAlpha(int i)
         {
             layer[i].texcoff = 0;
-            layer[i].texmapid = (int)texmapid[0];
+            layer[i].texmapFilename = map[0];
             layer[i].depthfunc = DepthFunc.GL_LESS;
             layer[i].depthWrite = true;
             layer[i].blend = true;
@@ -93,7 +97,7 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
         private void SetDetail(int i)
         {
             layer[i].texcoff = 1;
-            layer[i].texmapid = (int)texmapid[1];
+            layer[i].texmapFilename = map[1];
             layer[i].depthfunc = DepthFunc.GL_EQUAL;
             layer[i].depthWrite = false;
             layer[i].blend = true;
@@ -105,7 +109,7 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
         private void SetDirt(int i)
         {
             layer[i].texcoff = 2;
-            layer[i].texmapid = (int)texmapid[2];
+            layer[i].texmapFilename = map[2];
             layer[i].depthfunc = DepthFunc.GL_EQUAL;
             layer[i].depthWrite = false;
             layer[i].blend = true;
@@ -117,7 +121,7 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
         private void SetCrack(int i)
         {
             layer[i].texcoff = 3;
-            layer[i].texmapid = (int)texmapid[3];
+            layer[i].texmapFilename = map[3];
             layer[i].depthfunc = DepthFunc.GL_EQUAL;
             layer[i].depthWrite = false;
             layer[i].blend = true;
@@ -133,16 +137,15 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
         {
             if(alphamode == 2)
             {
-                int tmp;
-                tmp = layer[1].texmapid;
-                layer[1].texmapid = layer[2].texmapid;
-                layer[2].texmapid = tmp;
+                var tmp = layer[1].texmapFilename;
+                layer[1].texmapFilename = layer[2].texmapFilename;
+                layer[2].texmapFilename = tmp;
 
                 layer[1].texcoff = 1;
                 layer[2].texcoff = 0;
 
-                layer[1].texmapid = (int)texmapid[1];
-                layer[2].texmapid = (int)texmapid[0];
+                layer[1].texmapFilename = map[1];
+                layer[2].texmapFilename = map[0];
 
                 layer[1].depthfunc = DepthFunc.GL_LESS;
                 layer[2].depthfunc = DepthFunc.GL_EQUAL;
@@ -259,12 +262,11 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
                     //wreck (no bump)
                     if (mapnum == 3)
                     {
-                        //todo: implment from here down see modVisMeshShader.bas
                         layer[1].depthWrite = true;
 
                         layernum = 2;
                         layer[2].texcoff = 0;
-                        layer[2].texmapid = (int)texmapid[2]; // i think this variable name is refering to an opengl texture ID
+                        layer[2].texmapFilename = map[2]; // originally in the vb code layer[i] contained an openGL texture ID but I've changed this to the texture file path
                         layer[2].depthfunc = DepthFunc.GL_EQUAL;
                         layer[2].depthWrite = false;
                         if (alphamode == 1) {
@@ -286,7 +288,7 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
 
                         layernum = 2;
                         layer[2].texcoff = 0;
-                        layer[2].texmapid = (int)texmapid[3];
+                        layer[2].texmapFilename = map[3];
                         layer[2].depthfunc = DepthFunc.GL_EQUAL;
                         layer[2].depthWrite = false;
                         if (alphamode == 1)
@@ -354,7 +356,7 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
                                 twosided = true;
                                 layernum = 1;
                                 layer[1].texcoff = 0;
-                                layer[1].texmapid = (int)texmapid[0];
+                                layer[1].texmapFilename = map[0];
                                 layer[1].depthfunc = DepthFunc.GL_LESS;
                                 layer[1].depthWrite = true;
                                 layer[1].alphaTest = true;
@@ -375,7 +377,7 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
                                 layernum = 2;
                                 // ORIGINAL COMMENT: detail (trunk texture)
                                 layer[1].texcoff = 1;
-                                layer[1].texmapid = (int)texmapid[1];
+                                layer[1].texmapFilename = map[1];
                                 layer[1].depthfunc = DepthFunc.GL_LESS;
                                 layer[1].depthWrite = true;
                                 layer[1].blend = false;
@@ -383,7 +385,7 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
 
                                 // base (trunk dirt)
                                 layer[2].texcoff = 0;
-                                layer[2].texmapid = (int)texmapid[0];
+                                layer[2].texmapFilename = map[0];
                                 layer[2].depthfunc = DepthFunc.GL_EQUAL;
                                 layer[2].depthWrite = false;
                                 layer[2].blend = true;
@@ -412,9 +414,9 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
                             layer[2].texcoff = 1;
                             layer[3].texcoff = 3; //fixed
 
-                            layer[1].texmapid = (int)texmapid[0];
-                            layer[2].texmapid = (int)texmapid[1];
-                            layer[3].texmapid = (int)texmapid[2];
+                            layer[1].texmapFilename = map[0];
+                            layer[2].texmapFilename = map[1];
+                            layer[3].texmapFilename = map[2];
                             break;
                         case "BaseDetailDirt":
                         case "BaseDetailDirtNDetail":
@@ -579,6 +581,9 @@ namespace Stride.Assets.Models.bf2Importer.new_importer
 
         /// <summary>
         /// texmap[] index
+        /// JIM: in the vb program this 
+        /// is the openGL texture id of the
+        /// texture so it's useless in this c# version
         /// </summary>
         public uint[] texmapid;
 

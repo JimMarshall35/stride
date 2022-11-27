@@ -180,7 +180,7 @@ namespace Stride.Assets.Models.bf2Importer
 
         private static string GetMeshName(string path, int index) => $"{Path.GetFileName(path)}{index}_Mesh";
         private static string GetNodeName(string path, int index) => $"{Path.GetFileName(path)}{index}_Node";
-        private static string GetMaterialName(string path, int index) => $"{Path.GetFileName(path)}{index}_Material";
+        private static string GetMaterialName(bf2mat mat) => $"{mat.hash}_Material";
 
         private static bool ConsideredEqual(bf2mat mat1, bf2mat mat2)
         {
@@ -214,16 +214,33 @@ namespace Stride.Assets.Models.bf2Importer
             return true;
         }
 
-        private static void AddMaterialIfNotPresent(List<bf2mat> materials, bf2mat newCandidateMaterial)
+        /// <summary>
+        /// adds a material to the dictionary if there is not an equivalent one present,
+        /// generating a name for the key
+        /// </summary>
+        /// <param name="materials"> dictionary to fill will unique materials by calling this function </param>
+        /// <param name="newCandidateMaterial"> </param>
+        /// <param name="path"> used to generate name </param>
+        /// <param name="index"> used to generate name </param>
+        /// <returns>
+        /// the generated name, if there is one in the dictionary that's equivalent it'll return
+        /// that ones name (its key)
+        /// </returns>
+        private static string AddMaterialIfNotPresent(Dictionary<string, bf2mat> materials, bf2mat newCandidateMaterial)
         {
-            foreach(bf2mat mat in materials)
+            foreach(var p in materials)
             {
+                var name = p.Key;
+                var mat = p.Value;
                 if(ConsideredEqual(mat, newCandidateMaterial))
                 {
-                    return;
+                    return name;
                 }
             }
-            materials.Add(newCandidateMaterial);
+            // not in dict
+            var generatedName = GetMaterialName(newCandidateMaterial);
+            materials.Add(generatedName, newCandidateMaterial);
+            return generatedName;
         }
 
         private static void AddToTextureDependenciesIfNotPresent(List<string> deps, string newCandidate)
@@ -244,7 +261,7 @@ namespace Stride.Assets.Models.bf2Importer
             EntityInfo entityInfo = new EntityInfo();
             var meshParams = new List<MeshParameters>();
             var nodeInfos = new List<NodeInfo>();
-            var uniqueMaterials = new List<bf2mat>();
+            var uniqueMaterials = new Dictionary<string, bf2mat>();
             var textureDependencies = new List<string>();
             var materialsDict = new Dictionary<string, MaterialAsset>();
 
@@ -264,28 +281,39 @@ namespace Stride.Assets.Models.bf2Importer
                         nodeInfo.Name = GetNodeName(path, k);
                         nodeInfos.Add(nodeInfo);
                     }
-                    for (int k=0; k<bfmesh.geom[j].lod[j].matnum; k++)
+                    for (int k=0; k< lod.matnum; k++)
                     {
                         var mp = new MeshParameters();
                         mp.MeshName = GetMeshName(path, k);
-                        mp.MaterialName = GetMaterialName(path, k);
+                        bf2mat mat = lod.mat[k];
+                        // in the file, each lod of each geometry has it's own material,
+                        // with some being effectively copies of others. We remove the copies
+                        // and name each one storing in unique materials. We give the MeshParameter the
+                        // same name as the unique material
+                        var name = AddMaterialIfNotPresent(uniqueMaterials, mat);
+                        mp.MaterialName = name;
                         mp.NodeName = GetNodeName(path, k);
 
                         meshParams.Add(mp);
-                        bf2mat mat = bfmesh.geom[j].lod[j].mat[k];
-                        AddMaterialIfNotPresent(uniqueMaterials, mat);
                     }
                 }
                 //var mp = new MeshParameters();
                 //bfmesh.
             }
-            foreach(var mat in uniqueMaterials)
+
+            foreach(var pair in uniqueMaterials)
             {
+                var mat = pair.Value;
                 foreach(var mapName in mat.map)
                 {
                     AddToTextureDependenciesIfNotPresent(textureDependencies, mapName);
                 }
                 // TODO: add materials to entityinfo
+                var strideMat = new MaterialAsset();
+                foreach(var layer in mat.layer)
+                {
+                    //mat.IsBumpMap(layer.texmapFilename);
+                }
             }
             
             entityInfo.TextureDependencies = textureDependencies;
